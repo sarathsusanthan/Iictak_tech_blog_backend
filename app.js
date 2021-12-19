@@ -4,32 +4,12 @@ const port =process.env.PORT || 3000;
 const cors =require('cors');
 const bodyparser=require('body-parser');
 const Postdata=require('./src/model/PostData');
-const Userpostdata=require('./src/model/UserpostData');
+const Userpostdata=require('./src/model/Userpostdata');
 
 console.log("ok");
-
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
-
-//  Start of multer section
-const multer = require("multer");
-const multerStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "public/images");
-    },
-    filename: (req, file, cb) => {
-      const ext = file.mimetype.split("/")[1];
-      cb(null,  `files-${file.fieldname}-${Date.now()}.${ext}`);
-    },
-  });
-
-  const upload = multer({
-    storage: multerStorage,
-    // fileFilter: multerFilter,
-  });
-
-//   End of multer section
 app.get('/posts',(req,res)=>{
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -48,7 +28,7 @@ app.get('/posts/:id',(req,res)=>{
     })
 })
 
-app.post('/newpost',upload.single("image"),(req,res)=>{
+app.post('/newpost',(req,res)=>{
     
     res.header("Access-Control-Allow-Origin","*");
  res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -59,7 +39,7 @@ app.post('/newpost',upload.single("image"),(req,res)=>{
         author:req.body.author,
         category:req.body.category,
         post:req.body.post,
-        image:req.file.filename
+        image:req.body.image
     }
     
     var posts=new Postdata(post)
@@ -67,7 +47,32 @@ app.post('/newpost',upload.single("image"),(req,res)=>{
     res.send();
 })
 
-app.post('/usernewpost',(req,res)=>{
+app.delete('/delete/:id',(req,res)=>{
+    id=req.params.id;
+    Postdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
+    .then(()=>{
+        res.send();
+    })
+})
+
+//  Start of multer section
+const multer = require("multer");
+const multerStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "public/images");
+    },
+    filename: (req, file, cb) => {
+      const ext = file.mimetype.split("/")[1];
+      cb(null,  `files-${file.fieldname}-${Date.now()}.${ext}`);
+    },
+  });
+
+  const upload = multer({
+    storage: multerStorage,
+    // fileFilter: multerFilter,
+  });
+
+  app.post('/usernewpost',(req,res)=>{
     
     res.header("Access-Control-Allow-Origin","*");
  res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -131,11 +136,4 @@ app.put('/userupdatepost',(req,res)=>{
 
 
 
-app.delete('/delete/:id',(req,res)=>{
-    id=req.params.id;
-    Postdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
-    .then(()=>{
-        res.send();
-    })
-})
 app.listen(port,()=>{console.log("server ready at"+port)});
