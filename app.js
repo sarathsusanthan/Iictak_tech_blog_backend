@@ -1,14 +1,13 @@
 const express=require('express');
-// <<<<<<< HEAD
+
 const port =process.env.PORT || 3000;
 const cors =require('cors');
 const bodyparser=require('body-parser');
 const Postdata=require('./src/model/PostData');
 const Userpostdata=require('./src/model/UserpostData');
-// =======
-//const port =process.env.PORT || 3211;
+
 console.log("ok");
-// >>>>>>> f3c8132e86e33cba8b9dff502f1fa0defac5ebd9
+
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
