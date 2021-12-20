@@ -12,7 +12,12 @@
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+<<<<<<< HEAD
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.13"
+=======
+    "mongoose": "^6.1.2",
+    "nodemon": "^2.0.15"
+>>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
   }
 }

@@ -1,11 +1,20 @@
 const express=require('express');
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
 const port =process.env.PORT || 3000;
 const cors =require('cors');
 const bodyparser=require('body-parser');
 const Postdata=require('./src/model/PostData');
+<<<<<<< HEAD
 const Signupdata=require('./src/model/signupData');
 const Category=require('./src/model/category');
 const jwt=require('jsonwebtoken');
+=======
+const Trainerdata=require('./src/model/Trainerdata')
+console.log("ok");
+>>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
@@ -133,6 +142,7 @@ app.delete('/delete/:id',(req,res)=>{
         res.send();
     })
 })
+<<<<<<< HEAD
 //getting post for editing
 app.get('/edit/:id',(req,res)=>{
     const id=req.params.id;
@@ -146,11 +156,24 @@ app.get('/edit/:id',(req,res)=>{
 app.put('/updatepost',(req,res)=>{
     id=req.body._id;
     Postdata.findByIdAndUpdate({_id:id},{$set:{
+=======
+
+// trainer
+
+app.post('/trainerpost',(req,res)=>{
+    
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+ 
+ 
+    var post={
+>>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
         title:req.body.title,
         author:req.body.author,
         category:req.body.category,
         post:req.body.post,
         image:req.body.image
+<<<<<<< HEAD
     }},{new:true, useFindAndModify:false})
     .then(()=>{
         res.send();
@@ -177,4 +200,64 @@ app.get('/cat',(req,res)=>{
         res.send(cats);
     })
 })
+=======
+    }
+    
+    var posts=new Trainerdata(post)
+    posts.save()
+    res.send();
+})
+
+app.get('/trainerposts',function(req,res){
+    Trainerdata.find()
+    .then(function(posts){
+        res.send(posts);
+    });
+
+});
+
+app.get('/trainerpost/:id',  (req, res) => {
+  
+    const id = req.params.id;
+      Trainerdata.findOne({"_id":id})
+      .then((post)=>{
+          res.send(post);
+      });
+  })
+
+app.put('/edittrainerpost',(req,res)=>{
+    console.log(req.body)
+     id=req.body._id,
+    title= req.body.title,
+    author = req.body.author,
+    post = req.body.post,
+    category = req.body.category,
+    image = req.body.image
+    
+   Trainerdata.findByIdAndUpdate({"_id":id},
+                                {$set:{
+                                "title":title,
+                                "author":author,
+                                "category":category,
+                                "post":req.body.post,
+                                "image":image}})
+   .then(function(){
+       res.send();
+   })
+ })
+
+
+app.delete('/trainerdelete/:id',(req,res)=>{
+    id=req.params.id;
+    Trainerdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
+    .then(()=>{
+        res.send();
+    })
+})
+
+
+
+
+
+>>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
 app.listen(port,()=>{console.log("server ready at"+port)});
