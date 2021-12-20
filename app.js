@@ -1,20 +1,12 @@
 const express=require('express');
-<<<<<<< HEAD
-=======
-
->>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
 const port =process.env.PORT || 3000;
 const cors =require('cors');
 const bodyparser=require('body-parser');
 const Postdata=require('./src/model/PostData');
-<<<<<<< HEAD
 const Signupdata=require('./src/model/signupData');
 const Category=require('./src/model/category');
 const jwt=require('jsonwebtoken');
-=======
-const Trainerdata=require('./src/model/Trainerdata')
-console.log("ok");
->>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
+
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
@@ -71,19 +63,23 @@ app.post('/login',async (req,res)=>{
         let payload={subject:user+password}
         let token=jwt.sign(payload,'secretKey');
         
-        res.send({mesg:token});
+        res.send({mesg:token,role:'admin'});
     }
     const username= await Signupdata.findOne({email:use});
     if(username.id=="user"){
         if(username.password==pas){
-       
-            res.send({mesg:"user"});
+            let payload={subject:user+password}
+            let usertoken=jwt.sign(payload,'userKey');
+            
+            res.send({mesg:usertoken,role:'user'});
+            // res.send({mesg:"user"});
         }
     }
     if(username.id=="trainer"){
         if(username.password==pas){
-       
-            res.send({mesg:"trainer"});
+            let payload={subject:user+password}
+            let usertoken=jwt.sign(payload,'trainerKey');
+            res.send({mesg:usertoken,role:'trainer'});
         }
     }
     
@@ -123,6 +119,7 @@ app.post('/newpost',(req,res)=>{
  
  
     var post={
+        user:req.body.user,
         title:req.body.title,
         author:req.body.author,
         category:req.body.category,
@@ -142,7 +139,7 @@ app.delete('/delete/:id',(req,res)=>{
         res.send();
     })
 })
-<<<<<<< HEAD
+
 //getting post for editing
 app.get('/edit/:id',(req,res)=>{
     const id=req.params.id;
@@ -156,8 +153,16 @@ app.get('/edit/:id',(req,res)=>{
 app.put('/updatepost',(req,res)=>{
     id=req.body._id;
     Postdata.findByIdAndUpdate({_id:id},{$set:{
-=======
-
+        title:req.body.title,
+        author:req.body.author,
+        category:req.body.category,
+        post:req.body.post,
+        image:req.body.image
+    }},{new:true, useFindAndModify:false})
+    .then(()=>{
+        res.send();
+    })
+})
 // trainer
 
 app.post('/trainerpost',(req,res)=>{
@@ -167,18 +172,19 @@ app.post('/trainerpost',(req,res)=>{
  
  
     var post={
->>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
+
         title:req.body.title,
         author:req.body.author,
         category:req.body.category,
         post:req.body.post,
         image:req.body.image
-<<<<<<< HEAD
-    }},{new:true, useFindAndModify:false})
-    .then(()=>{
-        res.send();
-    })
+    }
+
+    var posts=new Trainerdata(post)
+    posts.save()
+    res.send();
 })
+
 //adding new category
 app.post('/categoty',(req,res)=>{
     var cat={
@@ -191,7 +197,14 @@ app.post('/categoty',(req,res)=>{
     res.send();
     
 })
-
+//deleting category
+app.delete('/deletecat/:id',(req,res)=>{
+    id=req.params.id;
+    Category.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
+    .then(()=>{
+        res.send();
+    })
+})
 //getting category
 
 app.get('/cat',(req,res)=>{
@@ -200,13 +213,8 @@ app.get('/cat',(req,res)=>{
         res.send(cats);
     })
 })
-=======
-    }
-    
-    var posts=new Trainerdata(post)
-    posts.save()
-    res.send();
-})
+
+   
 
 app.get('/trainerposts',function(req,res){
     Trainerdata.find()
@@ -255,9 +263,4 @@ app.delete('/trainerdelete/:id',(req,res)=>{
     })
 })
 
-
-
-
-
->>>>>>> 6b2389c8230b1544176cbaca036e15892893662c
 app.listen(port,()=>{console.log("server ready at"+port)});
