@@ -197,15 +197,37 @@ app.get('/userposts',function(req,res){
                 });
 
 //adding new category
-app.post('/categoty',(req,res)=>{
-    var cat={
-        category:req.body.category
-        
-    }
+app.post('/categoty',async (req,res)=>{
+
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+       try{
+           
+           const newcat=req.body.category;
+           
+           const category= await Category.findOne({category:newcat});
+           
+           if(category){
+               res.send({mesg:false})
+           }else{
+
+            var cat={
+                category:req.body.category
+                
+            }
+            
+            var cats=new Category(cat)
+            cats.save()
+            res.send({mesg:true});    
+           }
+           
+       }catch(error){
+           res.send({mesg:false});
+       }
+
+
+
     
-    var cats=new Category(cat)
-    cats.save()
-    res.send();
     
 })
 //deleting category
