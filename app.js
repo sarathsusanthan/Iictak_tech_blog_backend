@@ -11,6 +11,38 @@ const app=express();
 app.use(cors());
 app.use(bodyparser.json());
 
+function verifyToken(req, res, next) {
+    if(!req.headers.authorization) {
+      return res.status(401).send('Unauthorized request')
+    }
+    let token = req.headers.authorization.split(' ')[1]
+    if(token === 'null') {
+      return res.status(401).send('Unauthorized request')    
+    }
+    let payload = jwt.verify(token, 'secretKey')
+    if(!payload) {
+      return res.status(401).send('Unauthorized request')    
+    }
+    req.userId = payload.subject
+    next()
+  }
+
+//   function trainerverifyToken(req, res, next) {
+//     if(!req.headers.authorization) {
+//       return res.status(401).send('Unauthorized request')
+//     }
+//     let token = req.headers.authorization.split(' ')[1]
+//     if(token === 'null') {
+//       return res.status(401).send('Unauthorized request')    
+//     }
+//     let payload = jwt.verify(token, 'trainerKey')
+//     if(!payload) {
+//       return res.status(401).send('Unauthorized request')    
+//     }
+//     req.userId = payload.subject
+//     next()
+//   }
+
 // signup handling
 
 app.post('/signup',async (req,res)=>{
@@ -197,7 +229,7 @@ app.get('/userposts',function(req,res){
                 });
 
 //adding new category
-app.post('/categoty',(req,res)=>{
+app.post('/categoty',verifyToken,(req,res)=>{
     var cat={
         category:req.body.category
         
