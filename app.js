@@ -7,6 +7,7 @@ const Userpostdata=require('./src/model/Userpostdata');
 const Signupdata=require('./src/model/signupData');
 const Category=require('./src/model/category');
 const jwt=require('jsonwebtoken');
+const Contactdata = require('./src/model/contactdata');
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
@@ -229,15 +230,37 @@ app.get('/userposts',function(req,res){
                 });
 
 //adding new category
-app.post('/categoty',verifyToken,(req,res)=>{
-    var cat={
-        category:req.body.category
-        
-    }
-    
-    var cats=new Category(cat)
-    cats.save()
-    res.send();
+
+
+
+app.post('/categoty',verifyToken,async (req,res)=>{
+
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+       try{
+           
+           const newcat=req.body.category;
+           
+           const category= await Category.findOne({category:newcat});
+           
+           if(category){
+               res.send({mesg:false})
+           }else{
+
+            var cat={
+                category:req.body.category
+                
+            }
+            
+            var cats=new Category(cat)
+            cats.save()
+            res.send({mesg:true});    
+           }
+           
+       }catch(error){
+           res.send({mesg:false});
+       }
+   
     
 })
 //deleting category
@@ -271,6 +294,41 @@ app.delete('/deleteUserPost/:id',(req,res)=>{
 })
 
 
+//deleting post
+app.delete('/delete/:id',(req,res)=>{
+    id=req.params.id;
+    Postdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
+    .then(()=>{
+        res.send();
+    })
+})
 
+
+
+// adding user posts to db
+ 
+//contactus
+
+app.post('/contactus',function(req,res){
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+      
+          
+               
+                   var user={
+                       name:req.body.name,
+                     
+                       email:req.body.email,
+                       message:req.body.message
+                   }
+                   var mesg= new Contactdata(user);
+                   mesg.save();
+                   res.send({mesg:true});
+               });
+           
+    
+       
+   
+            // });              
 
 app.listen(port,()=>{console.log("server ready at"+port)});
