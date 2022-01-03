@@ -7,7 +7,9 @@ const UserpostSchema=new Schema({
     author:String,
     post:String,
     category:String,
-    image:String
+    image:String,
+    likes:Number,
+    dislikes:Number
 });
 var Userpostdata=mongoose.model('userpostdata',UserpostSchema);
 module.exports=Userpostdata;

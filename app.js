@@ -11,7 +11,7 @@ const Contactdata = require('./src/model/contactdata');
 const app=express();
 app.use(cors());
 app.use(bodyparser.json());
-
+//verify admin
 function verifyToken(req, res, next) {
     if(!req.headers.authorization) {
       return res.status(401).send('Unauthorized request')
@@ -28,21 +28,41 @@ function verifyToken(req, res, next) {
     next()
   }
 
-//   function trainerverifyToken(req, res, next) {
-//     if(!req.headers.authorization) {
-//       return res.status(401).send('Unauthorized request')
-//     }
-//     let token = req.headers.authorization.split(' ')[1]
-//     if(token === 'null') {
-//       return res.status(401).send('Unauthorized request')    
-//     }
-//     let payload = jwt.verify(token, 'trainerKey')
-//     if(!payload) {
-//       return res.status(401).send('Unauthorized request')    
-//     }
-//     req.userId = payload.subject
-//     next()
-//   }
+//verify trainer
+  function trainerverifyToken(req, res, next) {
+    
+    if(!req.headers.authorization) {
+      return res.status(401).send('Unauthorized request')
+    }
+    let token = req.headers.authorization.split(' ')[1]
+    if(token === 'null') {
+      return res.status(401).send('Unauthorized request')    
+    }
+    let payload = jwt.verify(token, 'trainerKey')
+    if(!payload) {
+      return res.status(401).send('Unauthorized request')    
+    }
+    req.userId = payload.subject
+    next()
+  }
+//verify user
+function userverifyToken(req, res, next) {
+    
+    if(!req.headers.authorization) {
+      return res.status(401).send('Unauthorized request')
+    }
+    let token = req.headers.authorization.split(' ')[1]
+    if(token === 'null') {
+      return res.status(401).send('Unauthorized request')    
+    }
+    let payload = jwt.verify(token, 'userKey')
+    if(!payload) {
+      return res.status(401).send('Unauthorized request')    
+    }
+    req.userId = payload.subject
+    next()
+  }
+
 
 // signup handling
 
@@ -145,7 +165,27 @@ app.get('/posts/:id',(req,res)=>{
     })
 })
 //adding new post
-app.post('/newpost',(req,res)=>{
+app.post('/newpost',verifyToken,(req,res)=>{
+    
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+ 
+ 
+    var post={
+        user:req.body.user,
+        title:req.body.title,
+        author:req.body.author,
+        category:req.body.category,
+        post:req.body.post,
+        image:req.body.image
+    }
+    
+    var posts=new Postdata(post)
+    posts.save()
+    res.send();
+})
+//adding new post by trainer
+app.post('/trainerpost',trainerverifyToken,(req,res)=>{
     
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -176,7 +216,7 @@ app.delete('/delete/:id',(req,res)=>{
 
 
 // adding user posts to db
-  app.post('/usernewpost',(req,res)=>{
+  app.post('/usernewpost',userverifyToken,(req,res)=>{
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
  
@@ -231,8 +271,6 @@ app.get('/userposts',function(req,res){
 
 //adding new category
 
-
-
 app.post('/categoty',verifyToken,async (req,res)=>{
 
     res.header("Access-Control-Allow-Origin","*");
@@ -264,7 +302,7 @@ app.post('/categoty',verifyToken,async (req,res)=>{
     
 })
 //deleting category
-app.delete('/deletecat/:id',(req,res)=>{
+app.delete('/deletecat/:id',verifyToken,(req,res)=>{
     id=req.params.id;
     Category.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
     .then(()=>{
@@ -325,10 +363,6 @@ app.post('/contactus',function(req,res){
                    mesg.save();
                    res.send({mesg:true});
                });
-           
-    
-       
-   
-            // });              
+                      
 
 app.listen(port,()=>{console.log("server ready at"+port)});
