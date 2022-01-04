@@ -116,15 +116,15 @@ app.post('/login',async (req,res)=>{
         let payload={subject:user+password}
         let token=jwt.sign(payload,'secretKey');
         
-        res.send({mesg:token,role:'admin'});
+        res.send({mesg:token,role:'admin',name:"admin"});
     }
     const username= await Signupdata.findOne({email:use});
     if(username.id=="user"){
         if(username.password==pas){
             let payload={subject:user+password}
             let usertoken=jwt.sign(payload,'userKey');
-            
-            res.send({mesg:usertoken,role:'user'});
+            let name=username.name;
+            res.send({mesg:usertoken,role:'user',nam:name});
             
         }
     }
@@ -132,7 +132,8 @@ app.post('/login',async (req,res)=>{
         if(username.password==pas){
             let payload={subject:user+password}
             let usertoken=jwt.sign(payload,'trainerKey');
-            res.send({mesg:usertoken,role:'trainer'});
+            let name=username.name;
+            res.send({mesg:usertoken,role:'trainer',nam:name});
         }
     }
     
