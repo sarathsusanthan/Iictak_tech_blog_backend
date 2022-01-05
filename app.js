@@ -1,5 +1,6 @@
 const express=require('express');
 const port =process.env.PORT || 3000;
+const path = require('path');
 const cors =require('cors');
 const bodyparser=require('body-parser');
 const Postdata=require('./src/model/PostData');
@@ -9,6 +10,7 @@ const Category=require('./src/model/category');
 const jwt=require('jsonwebtoken');
 const Contactdata = require('./src/model/contactdata');
 const app=express();
+app.use(express.static('./dist/Frontend'))
 app.use(cors());
 app.use(bodyparser.json());
 //verify admin
@@ -66,7 +68,7 @@ function userverifyToken(req, res, next) {
 
 // signup handling
 
-app.post('/signup',async (req,res)=>{
+app.post('/api/signup',async (req,res)=>{
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
        try{
@@ -76,12 +78,12 @@ app.post('/signup',async (req,res)=>{
            const username= await Signupdata.findOne({email:user});
            
            if(username){
-               res.send({mesg:false})
+              return res.send({mesg:false})
            }else{
                const pwd=req.body.user.password;
                const paswd= await Signupdata.findOne({password:pwd});
                if(paswd){
-                   res.send({mesg:false})
+                return res.send({mesg:false})
                }else{
                    var item={
                        name:req.body.user.name,
@@ -91,18 +93,18 @@ app.post('/signup',async (req,res)=>{
                    }
                    var sign= Signupdata(item);
                    sign.save();
-                   res.send({mesg:true})
+                   return res.send({mesg:true})
                }
            }
            
        }catch(error){
-           res.send({mesg:false})
+        return res.send({mesg:false})
        }
    
    })
 //login handling
 
-app.post('/login',async (req,res)=>{
+app.post('/api/login',async (req,res)=>{
     user="admin";
     password="1234";
     try {
@@ -116,7 +118,7 @@ app.post('/login',async (req,res)=>{
         let payload={subject:user+password}
         let token=jwt.sign(payload,'secretKey');
         
-        res.send({mesg:token,role:'admin',name:"admin"});
+        return res.send({mesg:token,role:'admin'});
     }
     const username= await Signupdata.findOne({email:use});
     if(username.id=="user"){
@@ -124,7 +126,7 @@ app.post('/login',async (req,res)=>{
             let payload={subject:user+password}
             let usertoken=jwt.sign(payload,'userKey');
             let name=username.name;
-            res.send({mesg:usertoken,role:'user',nam:name});
+            return res.send({mesg:usertoken,role:'user',nam:name});
             
         }
     }
@@ -133,21 +135,21 @@ app.post('/login',async (req,res)=>{
             let payload={subject:user+password}
             let usertoken=jwt.sign(payload,'trainerKey');
             let name=username.name;
-            res.send({mesg:usertoken,role:'trainer',nam:name});
+            return res.send({mesg:usertoken,role:'trainer',nam:name});
         }
     }
     
     else{
-        res.send({mesg:"notfound"});
+       return res.send({mesg:"notfound"});
     }
     
 }
 catch(error){
-    res.send({mesg:"notfound"});
+    return res.send({mesg:"notfound"});
    }
 })
 //getting posts
-app.get('/posts',(req,res)=>{
+app.get('/api/posts',(req,res)=>{
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
   
@@ -157,7 +159,7 @@ app.get('/posts',(req,res)=>{
     })
 })
 //getting single post
-app.get('/posts/:id',(req,res)=>{
+app.get('/api/posts/:id',(req,res)=>{
     const id=req.params.id;
     
     Postdata.findOne({"_id":id})
@@ -166,7 +168,7 @@ app.get('/posts/:id',(req,res)=>{
     })
 })
 //adding new post
-app.post('/newpost',verifyToken,(req,res)=>{
+app.post('/api/newpost',verifyToken,(req,res)=>{
     
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -186,7 +188,7 @@ app.post('/newpost',verifyToken,(req,res)=>{
     res.send();
 })
 //adding new post by trainer
-app.post('/trainerpost',trainerverifyToken,(req,res)=>{
+app.post('/api/trainerpost',trainerverifyToken,(req,res)=>{
     
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -206,7 +208,7 @@ app.post('/trainerpost',trainerverifyToken,(req,res)=>{
     res.send();
 })
 //deleting post
-app.delete('/delete/:id',(req,res)=>{
+app.delete('/api/delete/:id',(req,res)=>{
     id=req.params.id;
     Postdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
     .then(()=>{
@@ -217,7 +219,7 @@ app.delete('/delete/:id',(req,res)=>{
 
 
 // adding user posts to db
-  app.post('/usernewpost',userverifyToken,(req,res)=>{
+  app.post('/api/usernewpost',userverifyToken,(req,res)=>{
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
  
@@ -237,7 +239,7 @@ app.delete('/delete/:id',(req,res)=>{
   })
 
 //getting post for editing
-app.get('/edit/:id',(req,res)=>{
+app.get('/api/edit/:id',(req,res)=>{
     const id=req.params.id;
     
     Postdata.findOne({"_id":id})
@@ -246,7 +248,7 @@ app.get('/edit/:id',(req,res)=>{
     })
 })
 //updating posts
-app.put('/updatepost',(req,res)=>{
+app.put('/api/updatepost',(req,res)=>{
     id=req.body._id;
     Postdata.findByIdAndUpdate({_id:id},{$set:{
         title:req.body.title,
@@ -263,7 +265,7 @@ app.put('/updatepost',(req,res)=>{
 
 // getting user posts for approval
 
-app.get('/userposts',function(req,res){
+app.get('/api/userposts',function(req,res){
     
     Userpostdata.find()
                 .then(function(posts){
@@ -272,7 +274,7 @@ app.get('/userposts',function(req,res){
 
 //adding new category
 
-app.post('/categoty',verifyToken,async (req,res)=>{
+app.post('/api/categoty',verifyToken,async (req,res)=>{
 
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
@@ -283,7 +285,7 @@ app.post('/categoty',verifyToken,async (req,res)=>{
            const category= await Category.findOne({category:newcat});
            
            if(category){
-               res.send({mesg:false})
+              return res.send({mesg:false})
            }else{
 
             var cat={
@@ -293,17 +295,17 @@ app.post('/categoty',verifyToken,async (req,res)=>{
             
             var cats=new Category(cat)
             cats.save()
-            res.send({mesg:true});    
+            return res.send({mesg:true});    
            }
            
        }catch(error){
-           res.send({mesg:false});
+        return res.send({mesg:false});
        }
    
     
 })
 //deleting category
-app.delete('/deletecat/:id',verifyToken,(req,res)=>{
+app.delete('/api/deletecat/:id',verifyToken,(req,res)=>{
     id=req.params.id;
     Category.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
     .then(()=>{
@@ -312,7 +314,7 @@ app.delete('/deletecat/:id',verifyToken,(req,res)=>{
 })
 //getting category
 
-app.get('/cat',(req,res)=>{
+app.get('/api/cat',(req,res)=>{
     Category.find()
     .then((cats)=>{
         res.send(cats);
@@ -324,7 +326,7 @@ app.get('/cat',(req,res)=>{
 
 
 
-app.delete('/deleteUserPost/:id',(req,res)=>{
+app.delete('/api/deleteUserPost/:id',(req,res)=>{
     id=req.params.id;
     Userpostdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
     .then(()=>{
@@ -334,7 +336,7 @@ app.delete('/deleteUserPost/:id',(req,res)=>{
 
 
 //deleting post
-app.delete('/delete/:id',(req,res)=>{
+app.delete('/api/delete/:id',(req,res)=>{
     id=req.params.id;
     Postdata.findByIdAndDelete({_id:id},{new:true, useFindAndModify:false})
     .then(()=>{
@@ -342,13 +344,10 @@ app.delete('/delete/:id',(req,res)=>{
     })
 })
 
-
-
-// adding user posts to db
  
 //contactus
 
-app.post('/contactus',function(req,res){
+app.post('/api/contactus',function(req,res){
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
       
@@ -364,6 +363,8 @@ app.post('/contactus',function(req,res){
                    mesg.save();
                    res.send({mesg:true});
                });
-                      
+  app.get('/*',function(req,res){
+      res.sendFile(path.join(__dirname + '/dist/Frontend/index.html'));
+  })                    
 
 app.listen(port,()=>{console.log("server ready at"+port)});
