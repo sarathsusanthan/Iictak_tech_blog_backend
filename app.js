@@ -7,6 +7,7 @@ const Postdata=require('./src/model/PostData');
 const Userpostdata=require('./src/model/Userpostdata');
 const Signupdata=require('./src/model/signupData');
 const Category=require('./src/model/category');
+const Comment =require("./src/model/comments");
 const jwt=require('jsonwebtoken');
 const Contactdata = require('./src/model/contactdata');
 const app=express();
@@ -69,8 +70,10 @@ function userverifyToken(req, res, next) {
 // signup handling
 
 app.post('/api/signup',async (req,res)=>{
+
     res.header("Access-Control-Allow-Origin","*");
     res.header("Access-Control-Allow-Methods:GET, POST, PUT,DELETE");
+   
        try{
            
            const user=req.body.user.email;
@@ -80,21 +83,23 @@ app.post('/api/signup',async (req,res)=>{
            if(username){
               return res.send({mesg:false})
            }else{
-               const pwd=req.body.user.password;
-               const paswd= await Signupdata.findOne({password:pwd});
-               if(paswd){
-                return res.send({mesg:false})
-               }else{
+            //    const pwd=req.body.user.password;
+            //    const paswd= await Signupdata.findOne({password:pwd});
+            //    if(paswd){
+            //     return res.send({mesg:false})
+            //    }
+               
                    var item={
                        name:req.body.user.name,
                        id:req.body.user.id,
+                       qualification:req.body.user.qualification,
                        email:req.body.user.email,
                        password:req.body.user.password
                    }
                    var sign= Signupdata(item);
                    sign.save();
-                   return res.send({mesg:true})
-               }
+                   return res.send({mesg:true});
+               
            }
            
        }catch(error){
@@ -323,7 +328,7 @@ app.get('/api/cat',(req,res)=>{
 
    
 
-
+// deleting user post after approve/reject
 
 
 app.delete('/api/deleteUserPost/:id',(req,res)=>{
@@ -344,7 +349,28 @@ app.delete('/api/delete/:id',(req,res)=>{
     })
 })
 
- 
+//add comment to user
+
+app.post('/api/comment',(req,res)=>{
+
+    var item={
+        user:req.body.user,
+        title:req.body.title,
+        message:req.body.message
+    }
+    console.log(item)
+    var messag=new Comment(item)
+    messag.save()
+    res.send();
+})
+ //get comments
+
+ app.get("/api/getcomment",(req,res)=>{
+    Comment.find()
+    .then((msg)=>{
+        res.send(msg);
+    })
+ })
 //contactus
 
 app.post('/api/contactus',function(req,res){
@@ -363,6 +389,8 @@ app.post('/api/contactus',function(req,res){
                    mesg.save();
                    res.send({mesg:true});
                });
+
+              
   app.get('/*',function(req,res){
       res.sendFile(path.join(__dirname + '/dist/Frontend/index.html'));
   })                    
